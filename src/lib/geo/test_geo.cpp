@@ -320,3 +320,34 @@ TEST_F(GeoTest, getDistanceToArcNegativeSweep)
 	// THEN: it is NOT treated as on the arc (the old negative-sweep sector math returned ~zero here)
 	EXPECT_GT(err.distance, radius);
 }
+TEST_F(GeoTest, distanceToNextWaypointAntipodal)
+{
+	const double lat_now = 65.20356686222277;
+	const double lon_now = 115.1480498393297;
+	const double lat_next = -65.20356686222277;
+	const double lon_next = -64.8519501606703;
+
+	const float distance = get_distance_to_next_waypoint(lat_now, lon_now, lat_next, lon_next);
+
+	EXPECT_NEAR(distance, static_cast<float>(CONSTANTS_RADIUS_OF_EARTH * M_PI), 100.f);
+}
+
+
+TEST_F(GeoTest, distanceToPointGlobalWgs84Antipodal)
+{
+	const double lat_now = 65.20356686222277;
+	const double lon_now = 115.1480498393297;
+	const double lat_next = -65.20356686222277;
+	const double lon_next = -64.8519501606703;
+
+	float dist_xy = 0.f;
+	float dist_z = 0.f;
+
+	get_distance_to_point_global_wgs84(
+		lat_now, lon_now, 0.f,
+		lat_next, lon_next, 0.f,
+		&dist_xy, &dist_z);
+
+	EXPECT_NEAR(dist_xy, static_cast<float>(CONSTANTS_RADIUS_OF_EARTH * M_PI), 100.f);
+	EXPECT_FLOAT_EQ(dist_z, 0.f);
+}
